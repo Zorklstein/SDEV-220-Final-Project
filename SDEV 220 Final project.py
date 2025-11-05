@@ -15,7 +15,5 @@ class Employee:
                 f'Payrate: ${self.wage:.2f}/hour\n'+
                 f'Number of Dependants: {self.dependents}\n')
     
-p1 = Employee()
-p2 = Employee()
-print(p1, p2)
+
 
