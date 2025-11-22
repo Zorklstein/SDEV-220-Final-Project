@@ -3,12 +3,12 @@ import tkinter as tk
 from tkinter import messagebox
 
 class Employee:
-    def __init__(self):
-        self.firstName = input("What is the employee's first name: ")
-        self.lastName = input("What is the employee's last name: ")
-        self.employeeID = input("What is the employee's ID number: ")
-        self.wage = float(input("How much does the employee make per hour: "))
-        self.dependents = input("How many dependants does the employee have: ")
+    def __init__(self, firstName:str, lastName:str, employeeID:str, wage:float, dependents:int):
+        self.firstName = firstName
+        self.lastName = lastName
+        self.employeeID = employeeID
+        self.wage = wage
+        self.dependents = dependents
     
     def __str__(self):
         return (f'\nFirst Name: {self.firstName}\n' +
