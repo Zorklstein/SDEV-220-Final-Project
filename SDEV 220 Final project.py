@@ -3,21 +3,38 @@ from tkinter import messagebox
 
 # ------- Employee class -------
 class Employee:
-    def __init__(self, first, last, emp_id, wage, depend):
-        self.first = first
-        self.last = last
-        self.emp_id = emp_id
-        self.wage = float(wage)
-        self.depend = int(depend)
-
+    def __init__(self, firstName:str, lastName:str, employeeID:str, dependents:int, wage:float, hours:float):
+        self.firstName = firstName
+        self.lastName = lastName
+        self.employeeID = employeeID
+        self.wage = wage
+        self.hours = hours
+        self.grossPay = self.hours * self.wage
+        self.dependents = dependents
+    
     def __str__(self):
-        return (f"First Name: {self.first}\n"
-                f"Last Name: {self.last}\n"
-                f"Employee ID: {self.emp_id}\n"
-                f"Payrate: ${self.wage:.2f}/hour\n"
-                f"Dependents: {self.depend}\n")
+        return (f'\nFirst Name: {self.firstName}\n' +
+                f'Last Name: {self.lastName}\n'+
+                f'Employee ID: {self.employeeID}\n'+
+                f'Dependents: {self.dependents}\n'+
+                f'Payrate: ${self.wage:.2f}/hour\n'+
+                f'Hours : {self.hours}\n'+
+                f'Gross Pay: ${self.grossPay}')
+    
+    
+class employeeList:
+    def __init__(self):
+        self.employees = []
 
+    def add_employee(self, employee: Employee):
+        self.employees.append(employee)
 
+    def delete_employee(self, index):
+        if 0 <= index < len(self.employees):
+            del self.employees[index]
+
+    def get_all(self):
+        return self.employees
 # Store employees
 employees = []
 
