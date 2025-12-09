@@ -48,7 +48,7 @@ class employeeGUI:
     def __init__(self, root):
         self.employeeList = employeeList()
         self.root = root
-        self.root.title('Employee Form')
+        self.root.title('Employee Manager')
         self.guiSetup()
     
     def label(self, text, row, column):
@@ -77,9 +77,11 @@ class employeeGUI:
         tk.Button(self.root, text = 'Add Employee', command=self.addEmployee).grid(row=6, column=0, sticky='we')
         tk.Button(self.root, text = 'Delete Employee', command=self.deleteEmployee).grid(row=6, column=1, sticky='we')
         tk.Button(self.root, text = 'Save Info to File', command=self.saveToFile).grid(row=6,column=2, sticky='we')
+        tk.Button(self.root, text = 'Get Paystub', command=self.tax_logic).grid(row=6,column=3, sticky='we')
+
 
         self.employeeListDisplay = tk.Listbox(self.root,width=150)
-        self.employeeListDisplay.grid(row=7,column=0, columnspan=3, pady=25, sticky='we')
+        self.employeeListDisplay.grid(row=7,column=0, columnspan=4, pady=25, sticky='we')
 
     def addEmployee(self):
         firstName = self.firstName.get().title()
@@ -116,6 +118,52 @@ class employeeGUI:
         self.wage.delete(0,tk.END)
         self.hours.delete(0,tk.END)
         self.dependents.delete(0,tk.END)
+
+    def tax_logic(self):
+        selected = self.employeeListDisplay.curselection()
+        index = selected[0]
+        tempEmployee = self.employeeList.employees[index]
+
+        self.yearlyPay = tempEmployee.hours * tempEmployee.wage * 52
+
+        # Federal tax brackets
+        if self.yearlyPay <= 11925:
+            rate = 0.10
+        elif self.yearlyPay <= 48475:
+            rate = 0.12
+        elif self.yearlyPay <= 103358:
+            rate = 0.22
+        elif self.yearlyPay <= 197300:
+            rate = 0.24
+        elif self.yearlyPay <= 626350:
+            rate = 0.32
+        elif self.yearlyPay <= 751600:
+            rate = 0.35
+        else:
+            rate = 0.37
+
+        self.federal = tempEmployee.grossPay * rate
+        self.medicare = 0.0145 * tempEmployee.grossPay
+        self.social_security = 0.062 * tempEmployee.grossPay
+        self.local_tax = 0.0157 * tempEmployee.grossPay
+        self.state = 0.03 * tempEmployee.grossPay
+
+        # Net pay calculation
+        self.netPay = tempEmployee.grossPay - sum(
+            [self.federal, self.medicare,
+             self.social_security, self.local_tax,self.state])
+        
+        paywindow = tk.Toplevel(self.root)
+        paywindow.title(tempEmployee.firstName + ' ' + tempEmployee.lastName + "'s paystub")
+        paywindow.geometry('200x200')
+        tk.Label(paywindow, text=(f"\nFederal Tax: ${self.federal:.2f}"
+            f"\nMedicare: ${self.medicare:.2f}"
+            f"\nSocial Security: ${self.social_security:.2f}"
+            f"\nLocal Tax: ${self.local_tax:.2f}"
+            f"\nState Tax: ${self.state:.2f}"
+            f"\nNet Pay: ${self.netPay:.2f}"
+            )).pack()
+
 
 if __name__ == "__main__":
     root = tk.Tk()
