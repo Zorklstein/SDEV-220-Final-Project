@@ -18,8 +18,8 @@ class Employee:
                 f'Employee ID: {self.employeeID} | ' +
                 f'Dependents: {self.dependents} | ' +
                 f'Payrate: ${self.wage:.2f}/hour | ' +
-                f'Hours : {self.hours} | ' +
-                f'Gross Pay: ${self.grossPay}\n')
+                f'Hours: {self.hours} | ' +
+                f'Gross Pay: ${self.grossPay:.2f}\n')
     
    
 class employeeList:
@@ -42,6 +42,7 @@ class employeeList:
               temp = str(emplopyee)
               file.write(temp)
         file.close()
+        messagebox.showinfo("Saved", "All employee data saved to employees.txt")
 
 
 class employeeGUI:
@@ -78,7 +79,6 @@ class employeeGUI:
         tk.Button(self.root, text = 'Delete Employee', command=self.deleteEmployee).grid(row=6, column=1, sticky='we')
         tk.Button(self.root, text = 'Save Info to File', command=self.saveToFile).grid(row=6,column=2, sticky='we')
         tk.Button(self.root, text = 'Get Paystub', command=self.tax_logic).grid(row=6,column=3, sticky='we')
-
 
         self.employeeListDisplay = tk.Listbox(self.root,width=150)
         self.employeeListDisplay.grid(row=7,column=0, columnspan=4, pady=25, sticky='we')
@@ -123,7 +123,6 @@ class employeeGUI:
         selected = self.employeeListDisplay.curselection()
         index = selected[0]
         tempEmployee = self.employeeList.employees[index]
-
         self.yearlyPay = tempEmployee.hours * tempEmployee.wage * 52
 
         # Federal tax brackets
@@ -155,7 +154,7 @@ class employeeGUI:
         
         paywindow = tk.Toplevel(self.root)
         paywindow.title(tempEmployee.firstName + ' ' + tempEmployee.lastName + "'s paystub")
-        paywindow.geometry('200x200')
+        paywindow.geometry('400x150')
         tk.Label(paywindow, text=(f"\nFederal Tax: ${self.federal:.2f}"
             f"\nMedicare: ${self.medicare:.2f}"
             f"\nSocial Security: ${self.social_security:.2f}"
