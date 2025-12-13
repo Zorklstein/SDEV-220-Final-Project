@@ -16,7 +16,7 @@ class Employee:
         return (f'\nFirst Name: {self.firstName} | ' +
                 f'Last Name: {self.lastName} | ' +
                 f'Employee ID: {self.employeeID} | ' +
-                f'Dependents: {self.dependents} | ' +
+                f'Dependents: {self.dependents:.0f} | ' +
                 f'Payrate: ${self.wage:.2f}/hour | ' +
                 f'Hours: {self.hours} | ' +
                 f'Gross Pay: ${self.grossPay:.2f}\n')
@@ -26,10 +26,10 @@ class employeeList:
     def __init__(self):
         self.employees = []
 
-    def addEmployee(self, employee: Employee):
+    def listAddEmployee(self, employee: Employee):
         self.employees.append(employee)
 
-    def deleteEmployee(self, index):
+    def listDeleteEmployee(self, index):
         if 0 <= index < len(self.employees):
             del self.employees[index]
 
@@ -48,10 +48,11 @@ class employeeList:
 class employeeGUI:
     def __init__(self, root):
         self.employeeList = employeeList()
+        self.employeeIDTracker = []
         self.root = root
         self.root.title('Employee Manager')
         self.guiSetup()
-    
+        
     def label(self, text, row, column):
         tk.Label(root, text=text).grid(row=row,column=column, sticky = 'e')
 
@@ -75,33 +76,53 @@ class employeeGUI:
         self.hours = self.entry(4,1)
         self.dependents = self.entry(5,1)
 
-        tk.Button(self.root, text = 'Add Employee', command=self.addEmployee).grid(row=6, column=0, sticky='we')
-        tk.Button(self.root, text = 'Delete Employee', command=self.deleteEmployee).grid(row=6, column=1, sticky='we')
+        tk.Button(self.root, text = 'Add Employee', command=self.addEmployeeButton).grid(row=6, column=0, sticky='we')
+        tk.Button(self.root, text = 'Delete Employee', command=self.deleteEmployeeButton).grid(row=6, column=1, sticky='we')
         tk.Button(self.root, text = 'Save Info to File', command=self.saveToFile).grid(row=6,column=2, sticky='we')
         tk.Button(self.root, text = 'Get Paystub', command=self.tax_logic).grid(row=6,column=3, sticky='we')
 
         self.employeeListDisplay = tk.Listbox(self.root,width=150)
         self.employeeListDisplay.grid(row=7,column=0, columnspan=4, pady=25, sticky='we')
 
-    def addEmployee(self):
-        firstName = self.firstName.get().title()
-        lastName = self.lastName.get().title()
-        employeeID = self.employeeID.get()
-        wage = float(self.wage.get())
-        hours = float(self.hours.get())
-        dependents = float(self.dependents.get())
-
-        employee = Employee(firstName, lastName, employeeID, wage, hours, dependents)
-        self.employeeList.addEmployee(employee)
-        self.employeeListDisplay.insert(tk.END, employee)
-        self.clearEntrys()
+    def addEmployeeButton(self):
+        try:
+            firstName = str(self.firstName.get().title())
+            lastName = str(self.lastName.get().title())
+            employeeID = self.employeeID.get()
+            wage = float(self.wage.get())
+            hours = float(self.hours.get())
+            dependents = float(self.dependents.get())
+            
+        except(TypeError,ValueError,UnboundLocalError):
+            messagebox.showerror('INVALID ENTRY', 'One or more fields is entered incorrectly.')
+        
+        if employeeID in self.employeeIDTracker and employeeID != None:
+            messagebox.showerror('INVALID ID', 'Employee ID is already taken.')
+            employeeID = None
+        else:
+            self.employeeIDTracker.append(employeeID)
+        
+        if (employeeID != None):
+            try:
+                employee = Employee(firstName, lastName, employeeID, wage, hours, dependents)
+                self.employeeList.listAddEmployee(employee)
+                self.employeeListDisplay.insert(tk.END, employee)
+                self.clearEntrys()
+            except(UnboundLocalError, TypeError):
+                messagebox.showerror('INVALID ENTRY', 'One or more fields is entered incorrectly.')
     
-    def deleteEmployee(self):
-        selected = self.employeeListDisplay.curselection()
-        index = selected[0]
-        self.employeeList.deleteEmployee(index)
-        self.updateEmployeelistbox()
-        self.clearEntrys()
+    def deleteEmployeeButton(self):
+        try:
+            selected = self.employeeListDisplay.curselection()
+            index = selected[0]
+            tempEmployee = self.employeeList.employees[index]
+            selectedID = tempEmployee.employeeID
+            self.employeeIDTracker.remove(selectedID)
+            self.employeeList.listDeleteEmployee(index)
+            self.updateEmployeelistbox()
+            self.clearEntrys()
+        except(ValueError,TypeError,IndexError):
+            messagebox.showerror('INVALID SELECTION', 'Please make a valid selection from the list.')
     
     def saveToFile(self):
         self.employeeList.employeeFile()
@@ -155,7 +176,8 @@ class employeeGUI:
         paywindow = tk.Toplevel(self.root)
         paywindow.title(tempEmployee.firstName + ' ' + tempEmployee.lastName + "'s paystub")
         paywindow.geometry('400x150')
-        tk.Label(paywindow, text=(f"\nFederal Tax: ${self.federal:.2f}"
+        tk.Label(paywindow, text=(f"\nName: {tempEmployee.firstName} {tempEmployee.lastName}"
+            f"\nFederal Tax: ${self.federal:.2f}"
             f"\nMedicare: ${self.medicare:.2f}"
             f"\nSocial Security: ${self.social_security:.2f}"
             f"\nLocal Tax: ${self.local_tax:.2f}"
